@@ -3,8 +3,7 @@ services:
     build:
       context: ./build
       dockerfile: Dockerfile
-      args:
-        - TARGETPLATFORM=linux/arm64
+      platform: linux/arm64
     image: audiobookshelf:local-arm64
     container_name: audiobookshelf
     ports:
