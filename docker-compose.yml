@@ -1,0 +1,22 @@
+services:
+  audiobookshelf:
+    build:
+      context: https://github.com/advplyr/audiobookshelf.git#master
+      dockerfile: Dockerfile
+      args:
+        - TARGETPLATFORM=linux/arm64
+    container_name: audiobookshelf
+    ports:
+      - "13378:80"
+    volumes:
+      # Media libraries - adjust these paths to your actual audiobook/podcast locations
+      - ./audiobooks:/audiobooks
+      - ./podcasts:/podcasts
+      # Persistent data
+      - ./config:/config
+      - ./metadata:/metadata
+    environment:
+      - TZ=Europe/London  # Adjust to your timezone
+    restart: unless-stopped
+    # Uncomment to run as specific user (replace with your UID:GID from `id` command)
+    # user: "1000:1000"
