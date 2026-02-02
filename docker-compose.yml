@@ -3,10 +3,7 @@ services:
     build:
       context: ./build
       dockerfile: Dockerfile
-      platforms:
-        - linux/arm64
-    image: audiobookshelf:local-arm64
-    platform: linux/arm64
+    image: audiobookshelf:local-arm
     container_name: audiobookshelf
     ports:
       - "13378:80"

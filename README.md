@@ -1,8 +1,10 @@
-# Audiobookshelf Docker Setup (ARM64)
+# Audiobookshelf Docker Setup (ARM)
 
-Self-hosted audiobook and podcast server running on ARM64 (Raspberry Pi/similar).
+Self-hosted audiobook and podcast server for ARM devices (Raspberry Pi/similar).
 
-This repo uses the official [audiobookshelf](https://github.com/advplyr/audiobookshelf) as a git submodule and applies patches needed for ARM64 builds.
+This repo uses the official [audiobookshelf](https://github.com/advplyr/audiobookshelf) as a git submodule and applies patches needed for ARM builds.
+
+> **Note**: This build works on both 32-bit (armhf) and 64-bit (arm64) ARM. However, unicode folding in search is disabled on 32-bit systems due to library constraints.
 
 ## Quick Start
 
@@ -58,11 +60,11 @@ docker compose up -d
 
 ## What the Dockerfile Does
 
-The `Dockerfile.arm64` applies the following fixes for ARM64 builds:
+The `Dockerfile.arm64` applies the following fixes for ARM builds:
 
 1. **Uses Debian-based Node image for client build** - Alpine's musl libc lacks prebuilt `@tailwindcss/oxide` binaries for ARM, so we use `node:20-slim` (Debian) for the client build stage
 2. **Adds `py3-setuptools`** - Python 3.12+ removed the `distutils` module which `node-gyp` requires to build native modules like `sqlite3`
-3. **Fixes deprecated npm flag** - Changes `--only=production` to `--omit=dev`
+3. **Disables nunicode SQLite extension** - The prebuilt library only supports 64-bit ARM with musl libc, so we skip it for broader compatibility. This means unicode folding in search won't work, but all other features are fully functional.
 
 ## Volumes
 
@@ -86,6 +88,14 @@ Find your IP with:
 ```bash
 hostname -I
 ```
+
+## Requirements
+
+- ARM device (Raspberry Pi 3/4/5, or similar)
+- Docker and Docker Compose installed
+- At least 2GB free disk space for the build
+
+Works on both 32-bit (armhf) and 64-bit (arm64) ARM systems.
 
 ## Troubleshooting
 

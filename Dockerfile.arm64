@@ -1,8 +1,5 @@
-ARG NUSQLITE3_DIR="/usr/local/lib/nusqlite3"
-ARG NUSQLITE3_PATH="${NUSQLITE3_DIR}/libnusqlite3.so"
-
 ### STAGE 0: Build client ###
-# Use Debian-based image for better ARM64 native module support
+# Use Debian-based image for better ARM native module support
 # (Alpine's musl libc lacks prebuilt @tailwindcss/oxide binaries for ARM)
 FROM node:20-slim AS build-client
 
@@ -14,37 +11,23 @@ RUN npm run generate
 ### STAGE 1: Build server ###
 FROM node:20-alpine AS build-server
 
-ARG NUSQLITE3_DIR
-
 ENV NODE_ENV=production
 
 # Added py3-setuptools to fix "No module named 'distutils'" error on Python 3.12+
 RUN apk add --no-cache --update \
-  curl \
   make \
   python3 \
   py3-setuptools \
-  g++ \
-  unzip
+  g++
 
 WORKDIR /server
 COPY index.js package* /server
 COPY /server /server/server
 
-# Download ARM64 nunicode-sqlite library
-RUN curl -L -o /tmp/library.zip "https://github.com/mikiher/nunicode-sqlite/releases/download/v1.2/libnusqlite3-linux-musl-arm64.zip" && \
-  mkdir -p ${NUSQLITE3_DIR} && \
-  unzip /tmp/library.zip -d ${NUSQLITE3_DIR} && \
-  rm /tmp/library.zip && \
-  ls -la ${NUSQLITE3_DIR}
-
 RUN npm ci --omit=dev
 
 ### STAGE 2: Create minimal runtime image ###
 FROM node:20-alpine
-
-ARG NUSQLITE3_DIR
-ARG NUSQLITE3_PATH
 
 # Install only runtime dependencies
 RUN apk add --no-cache --update \
@@ -57,10 +40,6 @@ WORKDIR /app
 # Copy compiled frontend and server from build stages
 COPY --from=build-client /client/dist /app/client/dist
 COPY --from=build-server /server /app
-COPY --from=build-server ${NUSQLITE3_DIR}/ ${NUSQLITE3_DIR}/
-
-# Verify the library exists
-RUN ls -la ${NUSQLITE3_DIR}
 
 EXPOSE 80
 
@@ -69,8 +48,7 @@ ENV NODE_ENV=production
 ENV CONFIG_PATH="/config"
 ENV METADATA_PATH="/metadata"
 ENV SOURCE="docker"
-ENV NUSQLITE3_DIR=${NUSQLITE3_DIR}
-ENV NUSQLITE3_PATH=${NUSQLITE3_PATH}
+# Note: NUSQLITE3_PATH not set - unicode folding disabled but app works on 32-bit ARM
 
 ENTRYPOINT ["tini", "--"]
 CMD ["node", "index.js"]
