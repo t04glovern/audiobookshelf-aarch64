@@ -56,12 +56,13 @@ docker compose build --no-cache
 docker compose up -d
 ```
 
-## What the Patch Does
+## What the Dockerfile Does
 
-The `prepare-build.sh` script applies the following fixes:
+The `Dockerfile.arm64` applies the following fixes for ARM64 builds:
 
-1. **Adds `py3-setuptools`** - Python 3.12+ removed the `distutils` module which `node-gyp` requires to build native modules like `sqlite3`
-2. **Fixes deprecated npm flag** - Changes `--only=production` to `--omit=dev`
+1. **Uses Debian-based Node image for client build** - Alpine's musl libc lacks prebuilt `@tailwindcss/oxide` binaries for ARM, so we use `node:20-slim` (Debian) for the client build stage
+2. **Adds `py3-setuptools`** - Python 3.12+ removed the `distutils` module which `node-gyp` requires to build native modules like `sqlite3`
+3. **Fixes deprecated npm flag** - Changes `--only=production` to `--omit=dev`
 
 ## Volumes
 
