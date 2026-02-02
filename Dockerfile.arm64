@@ -4,7 +4,7 @@ ARG NUSQLITE3_PATH="${NUSQLITE3_DIR}/libnusqlite3.so"
 ### STAGE 0: Build client ###
 # Use Debian-based image for better ARM64 native module support
 # (Alpine's musl libc lacks prebuilt @tailwindcss/oxide binaries for ARM)
-FROM --platform=linux/arm64 node:20-slim AS build-client
+FROM node:20-slim AS build-client
 
 WORKDIR /client
 COPY /client /client
@@ -12,7 +12,7 @@ RUN npm ci && npm cache clean --force
 RUN npm run generate
 
 ### STAGE 1: Build server ###
-FROM --platform=linux/arm64 node:20-alpine AS build-server
+FROM node:20-alpine AS build-server
 
 ARG NUSQLITE3_DIR
 
@@ -41,7 +41,7 @@ RUN curl -L -o /tmp/library.zip "https://github.com/mikiher/nunicode-sqlite/rele
 RUN npm ci --omit=dev
 
 ### STAGE 2: Create minimal runtime image ###
-FROM --platform=linux/arm64 node:20-alpine
+FROM node:20-alpine
 
 ARG NUSQLITE3_DIR
 ARG NUSQLITE3_PATH
