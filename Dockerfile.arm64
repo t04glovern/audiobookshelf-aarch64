@@ -60,7 +60,7 @@ COPY --from=build-server /server /app
 COPY --from=build-server ${NUSQLITE3_DIR}/ ${NUSQLITE3_DIR}/
 
 # Verify the library exists
-RUN ls -la ${NUSQLITE3_DIR} && file ${NUSQLITE3_PATH}
+RUN ls -la ${NUSQLITE3_DIR}
 
 EXPOSE 80
 
