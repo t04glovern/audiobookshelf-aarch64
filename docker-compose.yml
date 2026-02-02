@@ -17,7 +17,7 @@ services:
       - ./config:/config
       - ./metadata:/metadata
     environment:
-      - TZ=Europe/London  # Adjust to your timezone
+      - TZ=Australia/Perth  # Adjust to your timezone
     restart: unless-stopped
     # Uncomment to run as specific user (replace with your UID:GID from `id` command)
     # user: "1000:1000"
