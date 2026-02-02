@@ -1,48 +1,67 @@
-# Audiobookshelf Docker Setup
+# Audiobookshelf Docker Setup (ARM64)
 
 Self-hosted audiobook and podcast server running on ARM64 (Raspberry Pi/similar).
 
+This repo uses the official [audiobookshelf](https://github.com/advplyr/audiobookshelf) as a git submodule and applies patches needed for ARM64 builds.
+
 ## Quick Start
 
-1. **Adjust the configuration** in `docker-compose.yml`:
-   - Update `TZ` to your timezone
-   - Modify volume paths if your audiobooks/podcasts are stored elsewhere
-   - Optionally set `user: "UID:GID"` to run as a specific user (run `id` to get your UID/GID)
-
-2. **Create the data directories**:
+1. **Clone this repo with submodules**:
    ```bash
-   mkdir -p audiobooks podcasts config metadata
+   git clone --recurse-submodules https://github.com/t04glovern/audiobookshelf-aarch64.git
+   cd audiobookshelf-aarch64
    ```
 
-3. **Build and start the container**:
+   Or if already cloned:
+   ```bash
+   git submodule update --init
+   ```
+
+2. **Run the prepare script** (copies source and applies patches):
+   ```bash
+   ./prepare-build.sh
+   ```
+
+3. **Adjust the configuration** in `docker-compose.yml`:
+   - Update `TZ` to your timezone
+   - Modify volume paths if your audiobooks/podcasts are stored elsewhere
+   - Optionally set `user: "UID:GID"` (run `id` to get your values)
+
+4. **Build and start the container**:
    ```bash
    docker compose up -d --build
    ```
    
-   > ⚠️ **Note**: The first build will take a while (10-30+ minutes on a Pi) as it compiles from source.
+   > ⚠️ **Note**: The first build takes 15-40+ minutes on ARM as it compiles from source.
 
-4. **Access the web UI**:
+5. **Access the web UI**:
    - Open http://<your-device-ip>:13378
    - Create your admin account on first visit
 
-## Managing the Container
+## Updating
+
+To update to the latest audiobookshelf version:
 
 ```bash
-# View logs
-docker compose logs -f audiobookshelf
+# Update the submodule to latest
+cd upstream
+git pull origin master
+cd ..
 
-# Stop the container
-docker compose down
+# Re-run prepare script to apply patches
+./prepare-build.sh
 
-# Rebuild (after updates)
+# Rebuild
 docker compose build --no-cache
 docker compose up -d
-
-# Update to latest version
-docker compose pull  # Won't work since we're building locally
-docker compose build --pull --no-cache  # This forces a fresh build
-docker compose up -d
 ```
+
+## What the Patch Does
+
+The `prepare-build.sh` script applies the following fixes:
+
+1. **Adds `py3-setuptools`** - Python 3.12+ removed the `distutils` module which `node-gyp` requires to build native modules like `sqlite3`
+2. **Fixes deprecated npm flag** - Changes `--only=production` to `--omit=dev`
 
 ## Volumes
 

@@ -1,10 +1,11 @@
 services:
   audiobookshelf:
     build:
-      context: https://github.com/advplyr/audiobookshelf.git#master
+      context: ./build
       dockerfile: Dockerfile
       args:
         - TARGETPLATFORM=linux/arm64
+    image: audiobookshelf:local-arm64
     container_name: audiobookshelf
     ports:
       - "13378:80"
